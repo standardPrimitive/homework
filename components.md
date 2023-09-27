@@ -101,6 +101,7 @@ class User {
   email
   title
 }
+
 class Topic {
   id
   title
@@ -110,8 +111,8 @@ class Topic {
   change_date
 }
 
-User --{ Blog
-Blog --{ Topic
+User <- Blog
+Blog <- Topic
 
 @enduml
 ```
