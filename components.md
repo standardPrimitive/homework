@@ -78,3 +78,40 @@ Rel(blog_service, db, "INSERT/SELECT/UPDATE", "SQL")
 - Изменение поста
   - Входные параметры: идентификатор поста, заголовок поста, автор, блог, содержания поста, дата создания
   - Выходные параметры: отсутствуют
+
+
+### Модель данных
+```puml
+@startuml
+
+class Blog {
+  id
+  name
+  type
+  description
+  date
+  author_id
+}
+
+class User {
+  id
+  login
+  first_name
+  last_name
+  email
+  title
+}
+class Topic {
+  id
+  title
+  author_id
+  blog_id
+  body
+  change_date
+}
+
+User --{ Blog
+Blog --{ Topic
+
+@enduml
+```
