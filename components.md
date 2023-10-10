@@ -11,32 +11,28 @@
 AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="microservice")
 AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
 
-Person(admin, "Администратор")
-Person(moderator, "Модератор")
 Person(user, "Пользователь")
 
-System_Ext(web_site, "Клиентский веб-сайт", "HTML, CSS, JavaScript, React", "Веб-интерфейс")
+System_Ext(program, "Клиентское ПО", "Node.js, Java, PHP, Ruby on Rails")
 
-System_Boundary(conference_site, "Сайт блогов") {
-   'Container(web_site, "Клиентский веб-сайт", ")
+System_Boundary(conference_site, "Сервис поиска попутчиков") {
+   'Container(program, "Клиентский веб-сайт", ")
    Container(client_service, "Сервис авторизации", "C++", "Сервис управления пользователями", $tags = "microService")    
-   Container(post_service, "Сервис постов", "C++", "Сервис управления блогами", $tags = "microService") 
-   Container(blog_service, "Сервис блогов", "C++", "Сервис управления постами", $tags = "microService")   
-   ContainerDb(db, "База данных", "MySQL", "Хранение данных о блогах, постах и пользователях", $tags = "storage")
+   Container(post_service, "Сервис маршрутов", "C++", "Сервис управления маршрутами", $tags = "microService") 
+   Container(blog_service, "Сервис поездок", "C++", "Сервис управления поездками", $tags = "microService")   
+   ContainerDb(db, "База данных", "MySQL", "Хранение данных о маршрутах, поездках и пользователях", $tags = "storage")
    
 }
 
-Rel(admin, web_site, "Просмотр, добавление и редактирование информации о пользователях, конференциях и докладах")
-Rel(moderator, web_site, "Модерация контента и пользователей")
-Rel(user, web_site, "Регистрация, просмотр информации о конференциях и докладах и запись на них")
+Rel(user, program, "Регистрация, просмотр/изменение информации о своих поездках/маршрутах")
 
-Rel(web_site, client_service, "Работа с пользователями", "localhost/person")
+Rel(program, client_service, "Работа с пользователями", "localhost/person")
 Rel(client_service, db, "INSERT/SELECT/UPDATE", "SQL")
 
-Rel(web_site, post_service, "Работа с постами", "localhost/pres")
+Rel(program, post_service, "Работа с маршрутами", "localhost/pres")
 Rel(post_service, db, "INSERT/SELECT/UPDATE", "SQL")
 
-Rel(web_site, blog_service, "Работа с блогами", "localhost/conf")
+Rel(program, blog_service, "Работа с поездками", "localhost/conf")
 Rel(blog_service, db, "INSERT/SELECT/UPDATE", "SQL")
 
 @enduml
@@ -46,23 +42,29 @@ Rel(blog_service, db, "INSERT/SELECT/UPDATE", "SQL")
 ### Сервис авторизации
 **API**:
 -	Создание нового пользователя
-      - входные параметры: login, пароль, имя, фамилия, email, обращение (г-н/г-жа)
+      - входные параметры: login, пароль, имя, фамилия, email, обращение (г-н/г-жа), паспортные данные, водительские права (для водителей), фото, номер телефона
       - выходные параметры: отсутствуют
 -	Поиск пользователя по логину
      - входные параметры:  login
-     - выходные параметры: имя, фамилия, email, обращение (г-н/г-жа)
+     - выходные параметры: имя, фамилия, email, обращение (г-н/г-жа), паспортные данные, водительские права (для водителей), фото, номер телефона
 -	Поиск пользователя по маске имени и фамилии
      - входные параметры: маска фамилии, маска имени
-     - выходные параметры: login, имя, фамилия, email, обращение (г-н/г-жа)
+     - выходные параметры: login, имя, фамилия, email, обращение (г-н/г-жа), паспортные данные, водительские права (для водителей), фото, номер телефона
+- Поиск пользователя по паспортным данным / водительскому удостоверению:
+      - входные параметры: паспортные данные / водительские права (для водителей)
+      - выходные параметры: login, имя, фамилия, email, обращение (г-н/г-жа), паспортные данные, водительские права (для водителей), фото, номер телефона 
+- Поиск пользователя по номеру телефона:
+      - входные параметры: номер телефона
+      - выходные параметры: login, имя, фамилия, email, обращение (г-н/г-жа), паспортные данные, водительские права (для водителей), фото, номер телефона 
 
-### Сервис блогов
+### Сервис маршрутов
 **API**:
-- Создание блога
-  - Входные параметры: название блога, категория, аннотация, автор и дата чоздания
-  - Выходыне параметры: млентификатор блога
-- Получение списка всех блогов
-  - Входные параметры: отсутствуют
-  - Выходные параметры: массив с блогов, где для каждого указаны его идентификатор, название, категория, аннотация, автор и дата написания
+- Создание маршрута
+  - Входные параметры: точка отправления, точка прибытия
+  - Выходыне параметры: маршрут
+- Получение списка всех поездок
+  - Входные параметры: пользователь, маршрут, желаемое время отправки
+  - Выходные параметры: список со всеми поездками, удовлетворяющим параметрам маршрута и желаемому времени
 
 ### Сервис постов
 **API**:
@@ -84,13 +86,11 @@ Rel(blog_service, db, "INSERT/SELECT/UPDATE", "SQL")
 ```puml
 @startuml
 
-class Blog {
+class Route {
   id
-  name
-  type
-  description
+  point_start
+  point_start
   date
-  author_id
 }
 
 class User {
@@ -99,20 +99,22 @@ class User {
   first_name
   last_name
   email
-  title
+  phone
+  age
+  passport_data
 }
 
-class Topic {
+class Trip {
   id
-  title
-  author_id
-  blog_id
-  body
-  change_date
+  route_ID
+  driver
+  table_Users
+  date
+  travel_conditions
 }
 
-User <- Blog
-Blog <- Topic
+User <- Route
+Route <- Trip
 
 @enduml
 ```
