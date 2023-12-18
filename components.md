@@ -88,9 +88,9 @@ Rel(blog_service, db, "INSERT/SELECT/UPDATE", "SQL")
 
 class Route {
   id
+  user_id
   point_start
-  point_start
-  date
+  point_end
 }
 
 class User {
@@ -108,9 +108,10 @@ class Trip {
   id
   route_ID
   driver
-  table_Users
-  date
+  user_id
+  date_depart
   travel_conditions
+  price
 }
 
 User <- Route
